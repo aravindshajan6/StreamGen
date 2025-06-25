@@ -151,3 +151,72 @@ export function logout(req, res) {
     success: true,
   });
 }
+
+export async function onboard(req, res) {
+  try {
+    //if protectedRoute passed, user value will be available
+    console.log("user inside onboard route - ", req.user);
+    const { fullName, bio, nativeLanguage, learningLanguage, location } =
+      req.body;
+    //default values for missing fields
+    if (
+      !fullName ||
+      !bio ||
+      !nativeLanguage ||
+      !learningLanguage ||
+      !location
+    ) {
+      res.status(400).json({
+        message: "All fields are required!",
+        missingFields: [
+          !fullName && "fullName",
+          !bio && "bio",
+          !nativeLanguage && "nativeLanguage",
+          !learningLanguage && "learningLanguage",
+          !location && "location",
+        ].filter(Boolean),
+      });
+    }
+
+    //update values in DB
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        ...req.body,
+        isOnboarded: true,
+      },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User not found!",
+      });
+    }
+
+    //TODO : update user in stream
+    try {
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePicture || "",
+      });
+      console.log(
+        "Stream user updated after onboarding for user - ",
+        updatedUser.fullName
+      );
+    } catch (streamError) {
+      console.error("Error updating user in stream:", streamError);
+    }
+    console.log("User updated successfully - ", updatedUser);
+    res.status(200).json({
+      message: "User onboarded successfully!",
+      user: updatedUser,
+      success: true,
+    });
+  } catch (error) {
+    console.log("Error in onboarding controller - ", error.message);
+    res.status(500).json({
+      message: "Internal server error!",
+    });
+  }
+}
