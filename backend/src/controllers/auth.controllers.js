@@ -55,6 +55,9 @@ export async function signup(req, res) {
       console.log("error creating user in stream.io - ", error.message);
     }
 
+
+    
+
     //JWT token
     const token = jwt.sign(
       { userId: newUser._id },
@@ -63,6 +66,7 @@ export async function signup(req, res) {
         expiresIn: "7d",
       }
     );
+    console.log("token inside signup route - ", token);
 
     res.cookie("token", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -80,7 +84,7 @@ export async function signup(req, res) {
       },
     });
   } catch (error) {
-    console.log("Error in signup controller");
+    console.log("Error in signup controller : ", error);
     res.status(500).json({
       error: error.message,
     });

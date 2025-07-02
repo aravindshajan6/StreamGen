@@ -9,6 +9,7 @@ export const protectedRoute = async(req, res, next) => {
         console.log("Token inside protected route : ", token);
 
         if(!token) {
+            console.log("no token found while checking for protected route");
             return res.status(401).json({ message: "Unauthorized - no token"});
         }
 
