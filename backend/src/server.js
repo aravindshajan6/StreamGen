@@ -13,6 +13,10 @@ import chatRoutes from "./routes/chat.routes.js";
 const PORT = process.env.PORT || 5001;
 
 const app = express();
+const __dirname = path.resolve();
+  connectDB();
+
+
 
 app.use(express.json());
 app.use(cookieParser());
@@ -28,6 +32,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
+
+
 app.get("/", (req, res) =>
   // console.log("Server is running on 5001"),
   res.send("Hello from the backend")
@@ -35,5 +41,16 @@ app.get("/", (req, res) =>
 
 app.listen(5001, () => {
   console.log(`Server is running on port ${PORT}`);
-  connectDB();
+});
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
+}
+
+app.listen(5001, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
