@@ -19,6 +19,8 @@ router.post("/onboarding", protectedRoute, onboard);
 
 //to check if user is logged in
 router.get("/me", protectedRoute, (req, res) => {
+  console.log("✅ /auth/me route hit");
+  console.log("req.user inside /me route ---->", req.user);
   res.status(200).json({ user: req.user });
 }); 
 

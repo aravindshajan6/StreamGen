@@ -55,9 +55,6 @@ export async function signup(req, res) {
       console.log("error creating user in stream.io - ", error.message);
     }
 
-
-    
-
     //JWT token
     const token = jwt.sign(
       { userId: newUser._id },
@@ -69,10 +66,10 @@ export async function signup(req, res) {
     console.log("token inside signup route - ", token);
 
     res.cookie("token", token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // must be false for localhost (true only in production with HTTPS)
+      sameSite: "lax", // "strict" blocks cookies across different ports
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({
@@ -126,9 +123,9 @@ export async function login(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true,
+      secure: false, // true only if using HTTPS (production)
+      sameSite: "lax", // or "none" if you ever test over https://
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
     });
 
     res.status(200).json({
@@ -219,7 +216,7 @@ export async function onboard(req, res) {
     });
   } catch (error) {
     console.log("Error in onboarding controller - ", error.message);
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal server error!",
     });
   }
